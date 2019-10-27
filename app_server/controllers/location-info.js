@@ -7,7 +7,8 @@ const locationInfo = (req, res) => {
 
 /* GET 'Add review' page */
 const addReview = (req, res) => {
-  res.render('index', { title: 'Add review' });
+  // res.render('index', { title: 'Add review' });
+  res.render('location-review-form', { title: 'Add review' });
 };
 
 const homelist = (req, res) => {
