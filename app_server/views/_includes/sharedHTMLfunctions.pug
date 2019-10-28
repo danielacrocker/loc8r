@@ -1,0 +1,27 @@
+mixin outputRating(rating)
+  - for (let i = 1; i <= rating; i++)
+    i.fas.fa-star
+  - for (let i = rating; i < 5; i++)
+    i.far.fa-star
+
+mixin welcome 
+  p Welcome
+
+mixin pageFooter
+  p Looking for wifi and a seat? Loc8r helps you find places to work when out and about. Perhaps with coffee, cake or a pint?  Let Loc8r help you find the place you're looking for.
+ 
+mixin advertStarcupsA
+  p Starcups is on Loc8r because it has accessible wifi and space to sit down with your laptop and get some work done.
+
+mixin advertStarcupsB
+  p If you've been and you like it - or if you don't - please leave a review to help other people just like you you.  
+
+mixin genericAdvert
+  p Loc8r was created to help people fine places to sit down and get a bit of work done.
+    | <br /><br />
+    | Lorem ipsum dolor sit amet, consecutur adipsicing elit, Nuncsed lorem ac nisi dinissim accumsan.
+
+mixin starcupGoogleMap
+  .card-block
+    h2.card-title Location map
+    img.img-fluid.rounded(src="https://maps.googleapis.com/maps/api/staticmap?center=51.455041,-0.9690884&zoom=17&size=400x350&sensor=false&markers=51.455041,-0.9690884&scale=2&key=AIzaSyDLFgtZEDLXRNzwFkqRnXZh2yk5U4Mc3PM")
