@@ -62,3 +62,4 @@ typings/
 
 # ignore .orig files
 .orig
+app_server/views/location-info.pug.orig2
