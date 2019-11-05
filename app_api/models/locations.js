@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+// const Loc = mongoose.model('Location');
 
 const openingTimeSchema = new mongoose.Schema({
   days: {
@@ -28,16 +29,19 @@ const reviewSchema = new mongoose.Schema({
 const locationSchema = new mongoose.Schema({
   name: { type: String, required: true},
   address: String,
-  rating: { type: Number, 'default': 0, min: 0, max: 5},
+  rating: { type: Number, "default": 0, min: 0, max: 5},
   facilities: [String],
-  coords: {
-    type: { type: String },
-    coordinates: [Number]
-  },
-  openingTImes: [openingTimeSchema],
+  coords: { type: { type: String }, coordinates: [Number]},
+  openingTimes: [openingTimeSchema],
   reviews: [reviewSchema]
 });
 
 locationSchema.index({coords: '2dsphere'});
 
-mongoose.model('Location', locationSchema);
+const Loc = mongoose.model('Location', locationSchema);
+
+module.exports = {
+  locationSchema,
+  reviewSchema,
+  openingTimeSchema
+}

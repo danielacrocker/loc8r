@@ -1,9 +1,11 @@
+
 const mongoose = require('mongoose');
 const dbURI = 'mongodb://localhost/Loc8r';
 
 mongoose.set('useUnifiedTopology', true);
 
 mongoose.connect(dbURI, {useNewUrlParser: true});
+mongoose.set('useCreateIndex', true);
 
 mongoose.connection.on('connected', () => {
   console.log(`Mongoose connected to ${dbURI}`);
