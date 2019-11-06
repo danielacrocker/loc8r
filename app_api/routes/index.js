@@ -13,19 +13,19 @@ router
 router
   .route('/locations/:locationid')
     .get(ctrlLocations.locationsReadOne)
-    .get(ctrlLocations.locationsCreate)  // test only
+    // .get(ctrlLocations.locationsCreate)  // test only
 /*   .put(ctrlLocations.locationsUpdateOne)
   .delete(ctrlLocations.locationsDeleteOne); */
 
 // reviews
-/* router
+router
   .route('/locations/:locationid/reviews')
   .post(ctrlReviews.reviewsCreate);
 
 router
   .route('/locations/:locationid/reviews/:reviewid')
   .get(ctrlReviews.reviewsReadOne)
-  .put(ctrlReviews.reviewsUpdateOne)
+/*   .put(ctrlReviews.reviewsUpdateOne)
   .delete(crtlReviews.reviewsDeleteOne); */
 
 module.exports = router;
