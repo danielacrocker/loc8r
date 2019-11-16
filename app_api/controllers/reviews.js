@@ -99,7 +99,6 @@ const updateAverageRating = (locationId) => {
     })
 }
 
-
 const reviewsUpdateOne = (req, res) => {
   if(!req.params.locationid || !req.params.reviewid) {
     return res

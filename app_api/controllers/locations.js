@@ -28,6 +28,15 @@ const formatDistance = (distance) => {
 }
 
 const renderHomepage = (req, res, responseBody) => {
+  let message = null;
+  if (!(responseBody instanceof Array)) {
+    message = "API lookup error";
+    responseBody = [];
+  } else {
+    if (!responseBody.length) {
+      message = "No places found nearby";
+    }
+  }
   res.render('locations-list', {
     title: 'Loc8r - find a place to work with wifi',
     pageHeader: { 
@@ -35,7 +44,7 @@ const renderHomepage = (req, res, responseBody) => {
       strapline: 'Find places to work with wifi near you!'
     },
     sidebar: "Looking for wifi and a seat? Loc8r helps you find places to work when out and about.",
-    locations: responseBody
+    locations: responseBody, message 
   });
 };
 
@@ -49,16 +58,20 @@ const homelist = (req, res) => {
       lng: -0.7992599,
       lat: 51.378091,
       maxDistance: 20
+/*       lng: 1,
+      lat: 1,
+      maxDistance : 0.002 */
     }
   };
-  request(
-    requestOptions,
-    (err, response, body) => {
+
+  request(requestOptions,(err, response, body) => {
       let data = [];
-      data = body.map( (item) => {
-        item.distance = formatDistance(item.distance);
-        return item;
-      });
+      if (statusCode === 200 && body.length) {
+        data = body.map( (item) => {
+          item.distance = formatDistance(item.distance);
+          return item;
+        });
+      }
       renderHomepage(req, res, data);
     }
   );
@@ -192,11 +205,11 @@ const locationsListByDistance = async(req, res) => {
     coordinates: [lng, lat]
   };
   const geoOptions = {
-    distancefield: "distance.calculated",
-    key: 'coords',
+    distanceField: "distance.calculated",
+    // key: 'coords',
     spherical: true,
     maxDistance: 20000,
-    limit: 10
+    num: 10
   };
   if (!lng || !lat) {
     return res

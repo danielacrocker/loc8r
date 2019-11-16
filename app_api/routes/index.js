@@ -7,15 +7,14 @@ const ctrlReviews = require('../controllers/reviews');
 // locations
 router
   .route('/locations')
-  // .get(ctrlLocations.locationsListByDistance)
+  .get(ctrlLocations.locationsListByDistance)
   .post(ctrlLocations.locationsCreate);
 
 router
   .route('/locations/:locationid')
-    .get(ctrlLocations.locationsReadOne)
-    // .get(ctrlLocations.locationsCreate)  // test only
-/*   .put(ctrlLocations.locationsUpdateOne)
-  .delete(ctrlLocations.locationsDeleteOne); */
+  .get(ctrlLocations.locationsReadOne)
+  .put(ctrlLocations.locationsUpdateOne)
+  .delete(ctrlLocations.locationsDeleteOne); 
 
 // reviews
 router
@@ -25,7 +24,7 @@ router
 router
   .route('/locations/:locationid/reviews/:reviewid')
   .get(ctrlReviews.reviewsReadOne)
-/*   .put(ctrlReviews.reviewsUpdateOne)
-  .delete(crtlReviews.reviewsDeleteOne); */
+  .put(ctrlReviews.reviewsUpdateOne)
+  .delete(ctrlReviews.reviewsDeleteOne); 
 
 module.exports = router;
