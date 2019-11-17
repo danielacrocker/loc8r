@@ -20,7 +20,7 @@ block content
             span.badge.badge-pill.badge-default.float-right= location.distance
           p.address= location.address
           .facilities
-            //- each facility in location.facilities
+            each facility in location.facilities
               span.badge.badge-warning= facility
 
           p List area.

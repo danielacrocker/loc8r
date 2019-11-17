@@ -1,4 +1,8 @@
+const request = require('request');
 
+const apiOptions = {
+  server: 'http://localhost:3000'
+};
 
 /* GET 'Location info' page */
 const locationInfo = (req, res) => {
@@ -50,8 +54,67 @@ const addReview = (req, res) => {
   res.render('location-review-form', { title: 'Add review' });
 };
 
-const homelist = (req, res) => {
+const renderHomepage = (req, res, responseBody) => {
+  let message = null;
+  if (!(responseBody instanceof Array)) {
+    message = "API lookup error";
+    responseBody = [];
+  } else {
+    if (!responseBody.length) {
+      message = "No places found nearby";
+    }
+  }
   res.render('locations-list', {
+    title: 'Loc8r - find a place to work with wifi',
+    pageHeader: {
+      title: 'Loc8r',
+      strapline: 'Find places to work with wifi near you!'
+    },
+    sidebar: "Looking for wifi and a seat? Loc8r helps you find plcase to work when out and about. Perhaps with coffee, cake or a pint ? Let Loc8r help you find the place you're looking for.",
+    locations: responseBody, message
+  });
+};
+
+const homelist = (req, res) => {
+  const path = '/api/locations';
+  const requestOptions = {
+    uri: `${apiOptions.server}${path}`,
+    method: 'GET',
+    json: {},
+    qs: {
+      lng: -0.7992599,
+      lat: 51.378091,
+      maxDistance: 20
+    }
+  };
+  request(
+    requestOptions, 
+    (err, {statusCode}, body) => {
+      let data = [];
+      if (statusCode === 200 && body.length) {
+      data = body.map((item) => {
+        item.distance = formatDistance(item.distance);
+        return item;
+      });
+    }
+    renderHomepage(req, res, data);
+    }
+  );
+};
+
+const formatDistance = (distance) => {
+  let thisDistance = 0;
+  let unit = 'm';
+  if (distance > 1000) {
+    thisDistance = parseFloat(distance / 1000).toFixed(1);
+    unit = 'km';
+  } else {
+    thisDistance = Math.floor(distance);
+  }
+  return thisDistance + unit;
+}
+
+/*   res.render('locations-list', {
     title: 'Loc8r - find a place to work with wifi',
     pageHeader: { 
       title: 'Loc8r',
@@ -79,8 +142,8 @@ const homelist = (req, res) => {
       facilities: ['Food', 'Premium wifi'],
       distance: '250m'
     }],
-  });
-};
+  }); */
+// };
 
 
 module.exports = {
