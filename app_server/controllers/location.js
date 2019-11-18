@@ -4,48 +4,41 @@ const apiOptions = {
   server: 'http://localhost:3000'
 };
 
-/* GET 'Location info' page */
-const locationInfo = (req, res) => {
-  res.render('location-info', { 
-    title: 'Starcups',
-    pageHeader: {title: 'Starcups'},
+const renderDetailPage = (req, res, location) => {
+  res.render('location-info', 
+  {
+    title: location.name,
+    pageHeader: {
+      title: location.name
+    },
     sidebar: {
       context: 'is on Loc8r because it has accessible wifi and space to sit down with your laptop and get some work done.',
       callToAction: 'If you\'ve been and you like  it - or if you don\'t please leave a review to help other people just like you.'
     },
-    location: {
-      name: 'Starcups',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 3,
-      facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-      coords: {lat: 51.455041, lng: -0.9690884},
-      openingTimes: [{
-        days: 'Monday - Friday', 
-        opening: '7:00am',
-        closing: '7:00pm',
-        closed: false
-      }, {
-        days: 'Saturday',
-        opening: '8:00am',
-        closing: '5:00pm',
-        closed: false
-      }, {
-        days: 'Sunday', 
-        closed: true
-      }],
-      reviews: [{
-        author: 'Simon Holmes',
-        rating: 5,
-        timestamp: '16 July 2013',
-        reviewText: 'What a great place. I can\'t say enough good thins about it.'
-      }, {
-        author: 'Charlie Chaplin',
-        rating: 3,
-        timestamp: '16 June 2013',
-        reviewText: 'It was okay. Coffee wasn\'t great, but the wifi was fast.'
-      }]
-    }
+    location   
   });
+}
+
+/* GET 'Location info' page */
+const locationInfo = (req, res) => {
+  //const path = `/api/locations/${req.params.locationid}`;
+  const path = `/api/locations/${req.params.id}`;
+  const requestOptions = {
+    url: `${apiOptions.server}${path}`,
+    method: 'GET',
+    json: {}
+  };
+  request(
+    requestOptions,
+    (err, response, body) => {
+      const data = body;
+      data.coords = {
+        lng: body.coords[0],
+        lat: body.coords[1]
+      };
+      renderDetailPage(req, res, data);
+    }
+  );
 };
 
 /* GET 'Add review' page */
@@ -56,7 +49,11 @@ const addReview = (req, res) => {
 
 const renderHomepage = (req, res, responseBody) => {
   let message = null;
-  if (!(responseBody instanceof Array)) {
+  // if (!(responseBody instanceof Array)) {
+  console.log('DEBUG ' + JSON.stringify(responseBody));
+  
+  if(responseBody === null) {
+    console.log('DEBUG responseBody null')
     message = "API lookup error";
     responseBody = [];
   } else {
@@ -85,19 +82,29 @@ const homelist = (req, res) => {
       lng: -0.7992599,
       lat: 51.378091,
       maxDistance: 20
+/*       lng: 1,
+      lat: 1,
+      maxDistance : 0.002 */
     }
   };
-  request(
-    requestOptions, 
-    (err, {statusCode}, body) => {
-      let data = [];
+  request(requestOptions, (err, {statusCode}, body) => 
+    {
+      const data = body;
+      console.log(JSON.stringify(data));
+/*       data.coords = {
+        lng: body.coords[0],
+        lat: body.coords[1]
+      }; */
+      renderDetailPage(req, res, data);
+/*       let data = [];
       if (statusCode === 200 && body.length) {
-      data = body.map((item) => {
-        item.distance = formatDistance(item.distance);
-        return item;
-      });
-    }
-    renderHomepage(req, res, data);
+        data = body.map((item) => {
+          item.distance = formatDistance(item.distance);
+          return item;
+        });
+      }
+      renderHomepage(req, res, data); */
+    // }
     }
   );
 };
@@ -113,38 +120,6 @@ const formatDistance = (distance) => {
   }
   return thisDistance + unit;
 }
-
-/*   res.render('locations-list', {
-    title: 'Loc8r - find a place to work with wifi',
-    pageHeader: { 
-      title: 'Loc8r',
-      strapline: 'Find places to work with wifi near you!'
-    },
-    sidebar: "Looking for wifi and a seat? Loc8r helps you find places to work when out and about.",
-    locations: [{
-      name: 'Starcups',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 3,
-      facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-      distance: '100m'
-    },
-    {
-      name: 'Cafe Hero',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 4,
-      faciliteis: ['Hot drinks', 'Food', 'Premium wifi'],
-      distance: '200m'
-    }, 
-    {
-      name: 'Burger Queen',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 2, 
-      facilities: ['Food', 'Premium wifi'],
-      distance: '250m'
-    }],
-  }); */
-// };
-
 
 module.exports = {
  homelist,

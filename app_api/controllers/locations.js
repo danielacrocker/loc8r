@@ -48,45 +48,6 @@ const renderHomepage = (req, res, responseBody) => {
   });
 };
 
-const homelist = (req, res) => {
-  const path = '/api/locations';
-  const requestOptions = {
-    url: `${apiOptions.server}${path}`,
-    method: 'GET',
-    json: {},
-    qs: {
-      lng: -0.7992599,
-      lat: 51.378091,
-      maxDistance: 20
-/*       lng: 1,
-      lat: 1,
-      maxDistance : 0.002 */
-    }
-  };
-
-  request(requestOptions,(err, response, body) => {
-      let data = [];
-      if (statusCode === 200 && body.length) {
-        data = body.map( (item) => {
-          item.distance = formatDistance(item.distance);
-          return item;
-        });
-      }
-      renderHomepage(req, res, data);
-    }
-  );
-};
-
-
-// const locationsCreate = (req, res) => { };
-
-/* const locationsCreate = (req, res) => {
-  console.log("api locations.js locationsCreate");
-  res
-    .status(200)
-    .json({"status" : "success"});
-} */
-
 const locationsCreate = (req, res) => {
   Loc.create({
     name: req.body.name,
@@ -230,10 +191,12 @@ const locationsListByDistance = async(req, res) => {
     const locations = results.map(result => {
       return {
         id: result._id,
+        coords: result.coords,
         name: result.name,
         address: result.address,
         rating: result.rating,
         facilities: result.facilities,
+        // openingTimes: result.openingTimes,
         distance: `${result.distance.calculated.toFixed()}`
       }
     });
@@ -281,18 +244,20 @@ const locationsUpdateOne = (req, res) => {
           parseFloat(req.body.lat)
         ]
       };
-      location.openingTimes = [{
-        days: req.body.days1,
-        opening: req.body.opening1,
-        closing: req.body.closing1,
-        closed: req.body.closed1,
-      }, {
-        days: req.body.days2,
-        opening: req.body.opening2,
-        closing: req.body.closing2,
-        closed: req.body.closed2
-      
-      }];
+      location.openingTimes = [
+        {
+          days: req.body.days1,
+          opening: req.body.opening1,
+          closing: req.body.closing1,
+          closed: req.body.closed1
+        }, 
+        {
+          days: req.body.days2,
+          opening: req.body.opening2,
+          closing: req.body.closing2,
+          closed: req.body.closed2
+        }
+      ];
       location.save((err, loc) => {
         if (err) {
           res
