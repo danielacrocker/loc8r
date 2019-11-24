@@ -1,11 +1,12 @@
 const request = require('request');
+const bodyParser = require('body-parser')
 
 const apiOptions = {
   server: 'http://localhost:3000'
 };
 
 /* GET 'Location info' page */
-const locationInfo = (req, res) => {
+/* const locationInfo = (req, res) => {
   res.render('location-info', { 
     title: 'Starcups',
     pageHeader: {title: 'Starcups'},
@@ -46,6 +47,29 @@ const locationInfo = (req, res) => {
       }]
     }
   });
+}; */
+
+const locationInfo = (req, res) => {
+  const path = `/api/locations/${req.params.locationid}`;
+  console.log('DEBUG locationInfo: req.params ');
+  console.log(req.params.locationid);
+  const requestOptions = {
+    url: `${apiOptions.server}${path}`,
+    method: 'GET',
+    json: {}
+  };
+  request(
+    requestOptions,
+    (err, response, body) => {
+      const data = body;
+      data.coords = {
+        lng: body.coords[0],
+        lat: body.coords[1]
+      };
+      console.log(JSON.stringify(response));
+      renderDetailPage(req, res, data);
+    }
+  );
 };
 
 /* GET 'Add review' page */
@@ -64,6 +88,7 @@ const renderHomepage = (req, res, responseBody) => {
       message = "No places found nearby";
     }
   }
+  console.log('DEBUG: responseBody: ' + JSON.stringify(responseBody));
   res.render('locations-list', {
     title: 'Loc8r - find a place to work with wifi',
     pageHeader: {
@@ -74,6 +99,21 @@ const renderHomepage = (req, res, responseBody) => {
     locations: responseBody, message
   });
 };
+
+const renderDetailPage = function(req, res, location) {
+  console.log('DEBUG: renderDetailPage');
+  res.render('location-info', {
+    title: location.name,
+    pageHeader: {
+      title: location.name
+    },
+    sidebar: {
+      context: 'is on Loc8r because it has accessible wifi and space to sidt down with your laptop and get some work done.',
+      callToAction: "If you\ve been and you like it - or if you don't - please leave a review to help other people just like you."
+    },
+    location
+  });
+}
 
 const homelist = (req, res) => {
   const path = '/api/locations';
@@ -92,12 +132,13 @@ const homelist = (req, res) => {
     (err, {statusCode}, body) => {
       let data = [];
       if (statusCode === 200 && body.length) {
-      data = body.map((item) => {
-        item.distance = formatDistance(item.distance);
-        return item;
-      });
-    }
-    renderHomepage(req, res, data);
+        data = body.map((item) => {
+          item.distance = formatDistance(item.distance);
+          return item;
+        });
+      }
+      console.log('DEBUG: renderHomepage');
+      renderHomepage(req, res, data);
     }
   );
 };
