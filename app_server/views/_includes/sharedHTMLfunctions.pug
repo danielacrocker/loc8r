@@ -25,3 +25,12 @@ mixin starcupGoogleMap
   .card-block
     h2.card-title Location map
     img.img-fluid.rounded(src="https://maps.googleapis.com/maps/api/staticmap?center=51.455041,-0.9690884&zoom=17&size=400x350&sensor=false&markers=51.455041,-0.9690884&scale=2&key=AIzaSyDLFgtZEDLXRNzwFkqRnXZh2yk5U4Mc3PM")
+
+mixin formatDate(dateString)
+  - const date = new Date(dateString);
+  - const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  - const d = date.getDate();
+  - const m = monthNames[date.getMonth()];
+  - const y = date.getFullYear();
+  - const output = `${d} ${m} ${y}`;
+  = output

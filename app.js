@@ -10,16 +10,8 @@ const bodyParser = require('body-parser');
 require('./app_api/models/locations');
 require('./app_api/models/db');
 
-
-
-//var indexRouter = require('./app_server/routes/index');
 const indexRouter = require('./app_server/routes/index');
 const apiRouter = require('./app_api/routes/index');
-//var usersRouter = require('./app_server/routes/users');
-const usersRouter = require('./app_server/routes/users');
-
-
-
 
 var app = express();
 

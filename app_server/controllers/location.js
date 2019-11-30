@@ -5,77 +5,105 @@ const apiOptions = {
   server: 'http://localhost:3000'
 };
 
-/* GET 'Location info' page */
-/* const locationInfo = (req, res) => {
-  res.render('location-info', { 
-    title: 'Starcups',
-    pageHeader: {title: 'Starcups'},
-    sidebar: {
-      context: 'is on Loc8r because it has accessible wifi and space to sit down with your laptop and get some work done.',
-      callToAction: 'If you\'ve been and you like  it - or if you don\'t please leave a review to help other people just like you.'
-    },
-    location: {
-      name: 'Starcups',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 3,
-      facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-      coords: {lat: 51.455041, lng: -0.9690884},
-      openingTimes: [{
-        days: 'Monday - Friday', 
-        opening: '7:00am',
-        closing: '7:00pm',
-        closed: false
-      }, {
-        days: 'Saturday',
-        opening: '8:00am',
-        closing: '5:00pm',
-        closed: false
-      }, {
-        days: 'Sunday', 
-        closed: true
-      }],
-      reviews: [{
-        author: 'Simon Holmes',
-        rating: 5,
-        timestamp: '16 July 2013',
-        reviewText: 'What a great place. I can\'t say enough good thins about it.'
-      }, {
-        author: 'Charlie Chaplin',
-        rating: 3,
-        timestamp: '16 June 2013',
-        reviewText: 'It was okay. Coffee wasn\'t great, but the wifi was fast.'
-      }]
-    }
-  });
-}; */
+const locationInfo = function(req, res) {
+  getLocationInfo(req, res,
+    (req, res, responseData) => {
+      renderDetailPage(req, res, responseData);
+    }); 
+};
 
-const locationInfo = (req, res) => {
+const getLocationInfo = (req, res, callback) => {
   const path = `/api/locations/${req.params.locationid}`;
-  console.log('DEBUG locationInfo: req.params ');
-  console.log(req.params.locationid);
   const requestOptions = {
-    url: `${apiOptions.server}${path}`,
+    url: apiOptions.server + path,
     method: 'GET',
     json: {}
   };
   request(
     requestOptions,
     (err, response, body) => {
-      const data = body;
-      data.coords = {
-        lng: body.coords[0],
-        lat: body.coords[1]
-      };
-      console.log(JSON.stringify(response));
-      renderDetailPage(req, res, data);
+      let data = body;
+      if (response.statusCode === 200) {
+        data.coords = {
+          lng: body.coords[0],
+          lat: body.coords[1]
+        };
+        callback(req, res, data);
+      } else {
+        showError(req, res, response.statusCode);
+      }
     }
   );
 };
 
+const showError = (req, res, status) => {
+  let title = '';
+  let content = '';
+  if (status === 404) {
+    title = '404, page not found';
+    content = 'Oh dear. Looks like you can\'t find this page. Sorry.';
+  } else {
+    title = `${status}, something's gone wrong`;
+    content = 'Something, somewhere, has gone just a little bit wrong.';
+  }
+  res.status(status);
+  res.render('generic-text', {
+    title,
+    content
+  });
+};
+
 /* GET 'Add review' page */
 const addReview = (req, res) => {
-  // res.render('index', { title: 'Add review' });
-  res.render('location-review-form', { title: 'Add review' });
+  getLocationInfo(req, res,
+    (req, res, responseData) => renderReviewForm(req, res, responseData)
+  );
+};
+
+const doAddReview = (req, res) => {
+
+  const locationid = req.params.locationid;
+  const path = `/api/locations/${locationid}/reviews`;
+
+  console.log('DEBUG: app_server doAddReview: author: ' + req.body.name);
+  console.log('DEBUG: app_server doAddReview: rating: ' + req.body.rating);
+  console.log('DEBUG: app_server doAddReview: review: ' + req.body.review);
+  
+  const postdata = {
+    author: req.body.name,
+    rating: parseInt(req.body.rating, 10),
+    reviewText: req.body.review
+  };
+
+  const requestOptions = {
+    url: apiOptions.server + path,
+    method: 'POST',
+    json: postdata
+  };
+
+  if (!postdata.author || !postdata.rating || !postdata.reviewText) {
+    res.redirect('/location/${locationid}/review/new?err=val');
+  } else {
+    console.log('DEBUG: locations.js doAddReview requestOptions: ' + JSON.stringify(requestOptions));
+
+    request (
+      requestOptions,
+      (err, response, body) => {
+        console.log('DEBUG: requestOptions: ' + JSON.stringify(requestOptions));
+        console.log('DEBUG request response.statusCode: ' + response.statusCode);
+        
+        if (response.statusCode === 201) {
+          res.redirect(`/location/${locationid}`);
+        } else if (response.statusCode === 400 && body.name && body.name === 'ValidationError') {
+          console.log('DEBUG: === 400: ' + response.statusCode);
+          res.redirect(`/location/${locationid}/review/new?err=val`);
+        } else {
+          console.log('DEBUG: else other error' + response.statusCode);
+          showError(req, res, response.statusCode);
+        }
+      }
+    );
+  }
 };
 
 const renderHomepage = (req, res, responseBody) => {
@@ -112,6 +140,13 @@ const renderDetailPage = function(req, res, location) {
       callToAction: "If you\ve been and you like it - or if you don't - please leave a review to help other people just like you."
     },
     location
+  });
+}
+
+const renderReviewForm = (req, res, {name}) => {
+  res.render('location-review-form', {
+    title: `Review ${name} on Loc8r`,
+    pageHeader: { title: `Review ${name}` }
   });
 }
 
@@ -155,40 +190,9 @@ const formatDistance = (distance) => {
   return thisDistance + unit;
 }
 
-/*   res.render('locations-list', {
-    title: 'Loc8r - find a place to work with wifi',
-    pageHeader: { 
-      title: 'Loc8r',
-      strapline: 'Find places to work with wifi near you!'
-    },
-    sidebar: "Looking for wifi and a seat? Loc8r helps you find places to work when out and about.",
-    locations: [{
-      name: 'Starcups',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 3,
-      facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-      distance: '100m'
-    },
-    {
-      name: 'Cafe Hero',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 4,
-      faciliteis: ['Hot drinks', 'Food', 'Premium wifi'],
-      distance: '200m'
-    }, 
-    {
-      name: 'Burger Queen',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 2, 
-      facilities: ['Food', 'Premium wifi'],
-      distance: '250m'
-    }],
-  }); */
-// };
-
-
 module.exports = {
  homelist,
  locationInfo,
- addReview 
+ addReview,
+ doAddReview
 };

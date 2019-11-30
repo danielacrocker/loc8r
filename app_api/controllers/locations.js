@@ -77,16 +77,6 @@ const homelist = (req, res) => {
   );
 };
 
-
-// const locationsCreate = (req, res) => { };
-
-/* const locationsCreate = (req, res) => {
-  console.log("api locations.js locationsCreate");
-  res
-    .status(200)
-    .json({"status" : "success"});
-} */
-
 const locationsCreate = (req, res) => {
   Loc.create({
     name: req.body.name,

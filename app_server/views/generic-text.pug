@@ -7,4 +7,4 @@ block content
       h1=title
   .row
     .col-12.col-lg-8
-      +genericAdvert
+      p !{(content).replace(/\n/g, '<br/>')}
