@@ -3,6 +3,8 @@ const Loc = mongoose.model('Location');
 
 const reviewsCreate = (req, res) => {
   const locationId = req.params.locationid;
+  // console.log('DEBUG: app_api **** req: ' + JSON.stringify(req));
+  console.log('DEBUG: app_api **** reviewsCreate(): ' + locationId);
 
   if (locationId) {
     Loc
@@ -10,19 +12,127 @@ const reviewsCreate = (req, res) => {
       .select('reviews')
       .exec((err, location) => {
         if (err) {
+          console.log('DEBUG: err reviewsCreate()');
           res
             .status(400)
             .json(err)
         } else {
-          doAddReview(rew, res, location);
+          console.log('DEBUG: reviewsCreate() doAddReview');
+
+          doAddReview(req, res, location);
         }
       });
   } else {
     res
-    .status(404()
-    .json({"message": "Location not found" }))
+    .status(404)
+    .json({"message": "Not found, locationid required" });
   }
  };
+
+const doAddReview = (req, res, location) => {
+  if (!location) {
+    res 
+      .status(404)
+      .json({
+        "message": "locationid not found"
+      }); 
+  } else {
+    location.reviews.push({
+      author: req.body.author,
+      rating: req.body.rating,
+      reviewText: req.body.reviewText
+    }); 
+    location.save((err, location) => {
+      if (err) {
+        console.log(err);
+        res
+          .status(400)
+          .json(err);
+      } else {
+        updateAverageRating(location._id);
+        let thisReview = location.reviews[location.reviews.length - 1]; 
+         res
+           .status(201)
+           .json(thisReview);
+      }   
+    }); 
+  } 
+
+  const doSetAverageRating = (location) => {
+    if (location.reviews && location.reviews.length > 0) {
+      const count = location.reviews.length;
+      const total = location.reviews.reduce((acc, {rating}) => {
+        return acc + rating;
+
+      }, 0);
+
+      location.rating = parseInt(total / count, 10);
+      location.save(err => {
+        if (err) {
+          console.log(err);
+
+        } else {
+          console.log(`Average rating updated to ${location.rating}`);
+        }
+      });
+    }
+  };
+
+  const updateAverageRating = (locationId) => {
+    Loc.findById(locationId)
+    .select('rating reveiws')
+    .exec((err, location) => {
+      if(!err) {
+        doSetAverageRating(location);
+      }
+    });
+  };
+
+ /*  const locationid = req.params.locationid;
+  const path = `/api/locations/${locationid}/reviews`;
+
+  console.log("DEBUG: doAddReview: locationid " + locationid);
+  console.log("DEBUG: name: " + req.body.name);
+  console.log("DEBUG: review: " + req.body.review);
+  console.log("DEBUG: req.body" + JSON.stringify(req.body));
+
+  const postdata = {
+    author: req.body.name,
+    rating: parseInt(req.body.rating, 10),
+    reviewText: req.body.review
+  };
+
+  const requestOptions = {
+    url: `${apiOptions.server}${path}`,
+    method: 'POST',
+    json: postdata
+  };
+
+  if (!postdata.author || !postdata.rating || !postdata.reviewText) {
+    console.log('DEBUG: error !postdata.author');
+    res.redirect(`/location/${locationid}/review/new?err=val`);
+  } else {
+
+    console.log('DEBUG: author rating reviewText ok');
+
+    request (
+      requestOptions,
+      (err, {statusCode}, {name}) => {
+
+        console.log('DEBUG: response: ' + response);
+
+        if (statusCode === 201) {
+          res.redirect(`/location/${locationid}`);
+        } else if (statusCode === 400 && name && name === 'ValidationError') {
+          res.redirect(`/location/${locationid}/review/new?err=val`);
+        }
+        else {
+          showError(req, res, statusCode);
+        }
+      }
+    );
+  } */
+};
 
 const reviewsReadOne = (req, res) => {
   Loc

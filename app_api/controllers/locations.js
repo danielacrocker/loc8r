@@ -48,6 +48,36 @@ const renderHomepage = (req, res, responseBody) => {
   });
 };
 
+const homelist = (req, res) => {
+  const path = '/api/locations';
+  const requestOptions = {
+    url: `${apiOptions.server}${path}`,
+    method: 'GET',
+    json: {},
+    qs: {
+      lng: -0.7992599,
+      lat: 51.378091,
+      maxDistance: 20
+/*       lng: 1,
+      lat: 1,
+      maxDistance : 0.002 */
+    }
+  };
+
+  request(requestOptions,(err, response, body) => {
+      let data = [];
+      if (statusCode === 200 && body.length) {
+        data = body.map( (item) => {
+          item.distance = formatDistance(item.distance);
+          return item;
+        });
+      }
+      renderHomepage(req, res, data);
+    }
+  );
+};
+
+>>>>>>> detachedbranch
 const locationsCreate = (req, res) => {
   Loc.create({
     name: req.body.name,

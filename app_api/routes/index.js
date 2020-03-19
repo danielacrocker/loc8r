@@ -3,7 +3,6 @@ const router = express.Router();
 const ctrlLocations = require('../controllers/locations');
 const ctrlReviews = require('../controllers/reviews');
 
-
 // locations
 router
   .route('/locations')
